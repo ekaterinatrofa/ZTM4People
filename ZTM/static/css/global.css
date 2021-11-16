@@ -1,0 +1,7 @@
+body {
+  color: #003152;
+  font-family: 'Open Sans', sans-serif;
+  margin: 0px;
+}
+
+.btn { cursor: pointer; }
