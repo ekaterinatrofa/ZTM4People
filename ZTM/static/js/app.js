@@ -1,11 +1,5 @@
 'use strict';
 
-const linesNight = ['N1','N2','N3','N4','N5','N6','N8','N9','N11','N12','N13'];
-const linesTram = [2,3,4,5,6,7,8,9,12,10];
-const config = {
-  apiUrl: 'https://ckan2.multimediagdansk.pl/gpsPositions'
-};
-
 let markersGroup = L.layerGroup();
 let map = L.map('map', {
   center: [54.372158, 18.638306],
@@ -13,14 +7,11 @@ let map = L.map('map', {
   zoomControl: false
 });
 
-
 let controls = L.control.zoom({
   position: 'bottomright'
 });
 
-
 controls.addTo(map);
-
 
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
   maxZoom: 17,
@@ -61,17 +52,18 @@ function onMapClick(e) {
 map.on('click', onMapClick);*/
 
 
-let updateMap = function(gpsData) {
+let updateMap = function() {
 
   markersGroup.clearLayers();
 
-  for (let i=0; i < gpsData['Vehicles'].length; i++) {
-
-    let vehicle = gpsData['Vehicles'][i];
-    let marker = L.marker([vehicle['Lat'], vehicle['Lon']], { icon: busIcon });
+  for (const singleGPSPos of gpsPos_array) {
+    console.log(singleGPSPos.Lat);
+    console.log(singleGPSPos.Lon);
+    let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: busIcon });
     let tooltipOffset = [0, 0];
 
-    /* Set black marker if night lines exist. */
+    var popUpStr = "Opóźnienie: " + singleGPSPos.Delay +"\nPrędkość: " + singleGPSPos.Speed;
+    /* Set black marker if night lines exist. 
     for (let i=0; i < linesNight.length; i++) {
 
       let line = linesNight[i];
@@ -81,9 +73,8 @@ let updateMap = function(gpsData) {
         tooltipOffset = [0, -28];
         break;
       }
-    };
-
-    /* Set red marker if tram lines exist. */
+    }; 
+    /* Set red marker if tram lines exist.
     for (let i=0; i < linesTram.length; i++) {
 
       let line = linesTram[i];
@@ -94,44 +85,18 @@ let updateMap = function(gpsData) {
         tooltipOffset = [0, -28];
         break;
       }
-    };
-
+    }; */
     /* Add line number label. */
-    marker.bindTooltip(vehicle['Line'], {
+    marker.bindTooltip(String(singleGPSPos.Line), {
       direction: 'top',
       permanent: true,
       offset: tooltipOffset
     });
-
-
-      marker.bindPopup(String(vehicle['Delay']));
-
-
-
-
+    marker.bindPopup(String(singleGPSPos.Delay));
     marker.addTo(markersGroup);
   };
-
   markersGroup.addTo(map);
 };
-
-
-function getGpsData() {
-
-  let data = null;
-  let req = new XMLHttpRequest();
-
-  req.open('GET', `${ config.apiUrl }`);
-  req.send(null);
-  req.onload = function() {
-    if (req.status === 200) {
-      data = JSON.parse(req.response);
-      updateMap(data);
-     // updateUI(data);
-    }
-  }
-};
-
 
 function toggleFront() {
 
@@ -143,11 +108,8 @@ function toggleFront() {
     : front.classList.add(className);
 };
 
-
 function updateUI(data) {
   document.getElementById('lastUpdate').innerText = data.LastUpdateData;
 }
 
-
-window.setInterval(getGpsData, 5000);
-getGpsData();
+updateMap();
