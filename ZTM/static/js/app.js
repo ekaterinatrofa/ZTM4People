@@ -1,5 +1,12 @@
 'use strict';
 
+let linesMap = new Map();
+for(const line of lines_array)
+{
+  let lineDesc = { routeLongName:line.routeLongName, routeType:line.routeType };
+  linesMap.set(line.routeShortName, lineDesc);
+}
+
 let markersGroup = L.layerGroup();
 let map = L.map('map', {
   center: [54.372158, 18.638306],
@@ -36,63 +43,29 @@ var tramIcon = L.icon({
     popupAnchor:  [1, -34] // point from which the popup should open relative to the iconAnchor
 });
 
-//L.marker([ 54.34695189156658,  18.645172119140625], {icon:busIcon}).addTo(map).bindPopup(" I am bus");
-
-//L.marker([ 54.32873744330398,  18.628692626953125], {icon:tramIcon}).addTo(map).bindPopup(" I am tram");
-
-/*let popup = L.popup();
-
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-
-map.on('click', onMapClick);*/
-
-
 let updateMap = function() {
 
   markersGroup.clearLayers();
 
   for (const singleGPSPos of gpsPos_array) {
-    console.log(singleGPSPos.Lat);
-    console.log(singleGPSPos.Lon);
-    let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: busIcon });
+    let lineDesc = linesMap.get(singleGPSPos.Line);
+    let vehicleThumbnail = busIcon;
+    if(lineDesc.routeType==="TRAM")
+    {
+      vehicleThumbnail = tramIcon;
+    }
+    let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: vehicleThumbnail });
     let tooltipOffset = [0, 0];
 
-    var popUpStr = "Opóźnienie: " + singleGPSPos.Delay +"\nPrędkość: " + singleGPSPos.Speed;
-    /* Set black marker if night lines exist. 
-    for (let i=0; i < linesNight.length; i++) {
+    let popUpStr = "Opóźnienie [s]: " + singleGPSPos.Delay +"<br />Prędkość [km/h]: " + singleGPSPos.Speed +"<br />";
+    popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
 
-      let line = linesNight[i];
-
-      if (line === vehicle['Line']) {
-        marker = L.marker([vehicle['Lat'], vehicle['Lon']]);
-        tooltipOffset = [0, -28];
-        break;
-      }
-    }; 
-    /* Set red marker if tram lines exist.
-    for (let i=0; i < linesTram.length; i++) {
-
-      let line = linesTram[i];
-
-      if (line === parseInt(vehicle['Line'])) {
-
-        marker = L.marker([vehicle['Lat'], vehicle['Lon']], { icon: tramIcon });
-        tooltipOffset = [0, -28];
-        break;
-      }
-    }; */
-    /* Add line number label. */
     marker.bindTooltip(String(singleGPSPos.Line), {
       direction: 'top',
       permanent: true,
       offset: tooltipOffset
     });
-    marker.bindPopup(String(singleGPSPos.Delay));
+    marker.bindPopup(String(popUpStr));
     marker.addTo(markersGroup);
   };
   markersGroup.addTo(map);
