@@ -16,52 +16,7 @@ let APIdata = {
   lastUpdateData: null
 }
 
-function getLastGPSPositions() {
-  let reqGPS = new XMLHttpRequest();
-  let fetchedData = null;
-  reqGPS.open('GET', `${ config.gpsPosAPI }`);
-  reqGPS.send(null);
-  reqGPS.onload = function() {
-    if (reqGPS.status === 200) {
-      fetchedData = JSON.parse(reqGPS.response);
-      APIdata.gpsPos_array = fetchedData['Vehicles'];
-      APIdata.lastUpdateData = fetchedData['LastUpdateData'];
-    }
-  }
-};
-
-function getRoutes() {
-  let reqRoutes = new XMLHttpRequest();
-  let fetchedData = null;
-  reqRoutes.open('GET', `${ config.routesAPI }`);
-  reqRoutes.send(null);
-  reqRoutes.onload = function() {
-    if (reqRoutes.status === 200) {
-      fetchedData = JSON.parse(reqRoutes.response);
-      APIdata.routes_array = fetchedData;
-    }
-  }
-};
-
-function getLines() {
-  let reqLines = new XMLHttpRequest();
-  let fetchedData = null;
-  reqLines.open('GET', `${ config.linesAPI }`);
-  reqLines.send(null);
-  reqLines.onload = function() {
-    if (reqLines.status === 200) {
-      fetchedData = JSON.parse(reqLines.response);
-      APIdata.lines_array = fetchedData;
-    }
-  }
-};
-
 let linesMap = new Map();
-for(const line of lines_array)
-{
-  let lineDesc = { routeLongName:line.routeLongName, routeType:line.routeType };
-  linesMap.set(line.routeShortName, lineDesc);
-}
 
 let markersGroup = L.layerGroup();
 let map = L.map('map', {
@@ -99,12 +54,56 @@ var tramIcon = L.icon({
     popupAnchor:  [1, -34] // point from which the popup should open relative to the iconAnchor
 });
 
-let updateMap = function() {
+async function getLastGPSPositions() {
+  await fetch(config.gpsPosAPI)
+  .then(async response => {
+    if(response.ok)
+    {
+      let fetchedData = await response.json()
+      .then(fetchedData => {
+        APIdata.gpsPos_array = fetchedData['Vehicles'];
+        APIdata.lastUpdateData = fetchedData['LastUpdateData'];
+      })
+    }
+  })
+};
+
+async function getRoutes() {
+  await fetch(config.routesAPI)
+  .then(async response => {
+    if(response.ok)
+    {
+      let fetchedData = await response.json()
+      .then(fetchedData => {
+        let currentDate = new Date().toISOString().slice(0,10);
+        APIdata.routes_array = fetchedData[currentDate]['trips'];
+      })
+    }
+  })
+};
+
+async function getLines() {
+  await fetch(config.linesAPI)
+  .then(async response => {
+    if(response.ok)
+    {
+      let fetchedData = await response.json()
+      .then(fetchedData => {
+        let currentDate = new Date().toISOString().slice(0,10);
+        APIdata.lines_array = fetchedData[currentDate]['routes'];
+      })
+    }
+  })
+};
+
+
+function updateMap() {
 
   markersGroup.clearLayers();
 
-  for (const singleGPSPos of gpsPos_array) {
-    let lineDesc = linesMap.get(singleGPSPos.Line);
+  for (const singleGPSPos of APIdata.gpsPos_array) {
+    let mapKey = singleGPSPos.Line.toString();
+    let lineDesc = linesMap.get(mapKey);
     let vehicleThumbnail = busIcon;
     if(lineDesc.routeType==="TRAM")
     {
@@ -125,7 +124,7 @@ let updateMap = function() {
     marker.addTo(markersGroup);
   };
   markersGroup.addTo(map);
-};
+}
 
 function toggleFront() {
 
@@ -135,16 +134,36 @@ function toggleFront() {
   front.classList.contains(className)
     ? front.classList.remove(className)
     : front.classList.add(className);
-};
+}
 
 function updateUI(data) {
   document.getElementById('lastUpdate').innerText = data.LastUpdateData;
 }
 
-getLastGPSPositions();
-setInterval(getLastGPSPositions, config.gpsInterval);
-getLines();
-setInterval(getLines, config.linesInterval);
 getRoutes();
+
+getLines().then(() => {
+  for(const line of APIdata.lines_array)
+  {
+    let lineDesc = { 
+      routeLongName: line.routeLongName,
+      routeType:line.routeType 
+    };
+    linesMap.set(line.routeShortName.toString(), lineDesc);
+  }
+  getLastGPSPositions().then(() => {
+    updateMap();
+  });
+});
+
+function refreshMap()
+{
+  getLastGPSPositions().then(() => {
+    updateMap();
+  });
+}
+
+refreshMap();
+setInterval(refreshMap, config.gpsInterval);
+setInterval(getLines, config.linesInterval);
 setInterval(getRoutes, config.routesInterval);
-updateMap();
