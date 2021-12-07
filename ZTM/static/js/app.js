@@ -1,5 +1,61 @@
 'use strict';
 
+const config = {
+  gpsPosAPI: 'https://ckan2.multimediagdansk.pl/gpsPositions',
+  routesAPI: 'https://ckan.multimediagdansk.pl/dataset/c24aa637-3619-4dc2-a171-a23eec8f2172/resource/b15bb11c-7e06-4685-964e-3db7775f912f/download/trips.json',
+  linesAPI: 'https://ckan.multimediagdansk.pl/dataset/c24aa637-3619-4dc2-a171-a23eec8f2172/resource/22313c56-5acf-41c7-a5fd-dc5dc72b3851/download/routes.json',
+  gpsInterval: 20000,
+  routesInterval: 1000 * 60 * 60 * 24,
+  linesInterval: 1000 * 60 * 60 * 24
+};
+
+let APIdata = {
+  gpsPos_array: null,
+  lines_array: null,
+  routes_array: null,
+  lastUpdateData: null
+}
+
+function getLastGPSPositions() {
+  let reqGPS = new XMLHttpRequest();
+  let fetchedData = null;
+  reqGPS.open('GET', `${ config.gpsPosAPI }`);
+  reqGPS.send(null);
+  reqGPS.onload = function() {
+    if (reqGPS.status === 200) {
+      fetchedData = JSON.parse(reqGPS.response);
+      APIdata.gpsPos_array = fetchedData['Vehicles'];
+      APIdata.lastUpdateData = fetchedData['LastUpdateData'];
+    }
+  }
+};
+
+function getRoutes() {
+  let reqRoutes = new XMLHttpRequest();
+  let fetchedData = null;
+  reqRoutes.open('GET', `${ config.routesAPI }`);
+  reqRoutes.send(null);
+  reqRoutes.onload = function() {
+    if (reqRoutes.status === 200) {
+      fetchedData = JSON.parse(reqRoutes.response);
+      APIdata.routes_array = fetchedData;
+    }
+  }
+};
+
+function getLines() {
+  let reqLines = new XMLHttpRequest();
+  let fetchedData = null;
+  reqLines.open('GET', `${ config.linesAPI }`);
+  reqLines.send(null);
+  reqLines.onload = function() {
+    if (reqLines.status === 200) {
+      fetchedData = JSON.parse(reqLines.response);
+      APIdata.lines_array = fetchedData;
+    }
+  }
+};
+
 let linesMap = new Map();
 for(const line of lines_array)
 {
@@ -85,4 +141,10 @@ function updateUI(data) {
   document.getElementById('lastUpdate').innerText = data.LastUpdateData;
 }
 
+getLastGPSPositions();
+setInterval(getLastGPSPositions, config.gpsInterval);
+getLines();
+setInterval(getLines, config.linesInterval);
+getRoutes();
+setInterval(getRoutes, config.routesInterval);
 updateMap();
