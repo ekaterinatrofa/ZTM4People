@@ -38,76 +38,87 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
   id: 'mapbox/streets-v11',
-  accessToken:'pk.eyJ1IjoiZWthdGVyaW5hdHJvZmEiLCJhIjoiY2t3MWEyempsMWp0ajJvcWl1OHR3b3F2cyJ9.-WBm6QG9x_C2TEkiBj2lQw'
+  accessToken: 'pk.eyJ1IjoiZWthdGVyaW5hdHJvZmEiLCJhIjoiY2t3MWEyempsMWp0ajJvcWl1OHR3b3F2cyJ9.-WBm6QG9x_C2TEkiBj2lQw'
 }).addTo(map);
 
-var busIcon = L.icon({
-    iconUrl: 'https://visualpharm.com/assets/845/Bus-595b40b75ba036ed117d73c1.svg',
-    iconSize:     [35, 55], // size of the icon
-    iconAnchor:   [12, 41], // point of the icon which will correspond to marker's location
-    popupAnchor:  [1, -34] // point from which the popup should open relative to the iconAnchor
+var greenBusIcon = L.icon({
+  iconUrl: 'images/green_bus_icon.svg',
+  iconSize: [50, 50], // size of the icon
+  iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34] // point from which the popup should open relative to the iconAnchor
 });
 
-var tramIcon = L.icon({
-    iconUrl: 'https://visualpharm.com/assets/7/Tram-595b40b75ba036ed117d77b2.svg',
-    iconSize:     [35, 55], // size of the icon
-    iconAnchor:   [12, 41], // point of the icon which will correspond to marker's location
-    popupAnchor:  [1, -34] // point from which the popup should open relative to the iconAnchor
+var greenTramIcon = L.icon({
+  iconUrl: 'images/green_tram_icon.svg',
+  iconSize: [45, 50], // size of the icon
+  iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34] // point from which the popup should open relative to the iconAnchor
 });
+
+var redBusIcon = L.icon({
+  iconUrl: 'images/red_bus_icon.svg',
+  iconSize: [50, 50], // size of the icon
+  iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34] // point from which the popup should open relative to the iconAnchor
+});
+
+var redTramIcon = L.icon({
+  iconUrl: 'images/red_tram_icon.svg',
+  iconSize: [45, 50], // size of the icon
+  iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
+  popupAnchor: [1, -34] // point from which the popup should open relative to the iconAnchor
+});
+
 
 async function getLastGPSPositions() {
   await fetch(config.gpsPosAPI)
-  .then(async response => {
-    if(response.ok)
-    {
-      let fetchedData = await response.json()
-      .then(fetchedData => {
-        APIdata.gpsPos_array = fetchedData['Vehicles'];
-        APIdata.lastUpdateData = fetchedData['LastUpdateData'];
-      })
-    }
-  })
+    .then(async response => {
+      if (response.ok) {
+        let fetchedData = await response.json()
+          .then(fetchedData => {
+            APIdata.gpsPos_array = fetchedData['Vehicles'];
+            APIdata.lastUpdateData = fetchedData['LastUpdateData'];
+          })
+      }
+    })
 };
 
 async function getRoutes() {
   await fetch(config.routesAPI)
-  .then(async response => {
-    if(response.ok)
-    {
-      let fetchedData = await response.json()
-      .then(fetchedData => {
-        let currentDate = new Date().toISOString().slice(0,10);
-        APIdata.routes_array = fetchedData[currentDate]['trips'];
-      })
-    }
-  })
+    .then(async response => {
+      if (response.ok) {
+        let fetchedData = await response.json()
+          .then(fetchedData => {
+            let currentDate = new Date().toISOString().slice(0, 10);
+            APIdata.routes_array = fetchedData[currentDate]['trips'];
+          })
+      }
+    })
 };
 
 async function getLines() {
   await fetch(config.linesAPI)
-  .then(async response => {
-    if(response.ok)
-    {
-      let fetchedData = await response.json()
-      .then(fetchedData => {
-        let currentDate = new Date().toISOString().slice(0,10);
-        APIdata.lines_array = fetchedData[currentDate]['routes'];
-      })
-    }
-  })
+    .then(async response => {
+      if (response.ok) {
+        let fetchedData = await response.json()
+          .then(fetchedData => {
+            let currentDate = new Date().toISOString().slice(0, 10);
+            APIdata.lines_array = fetchedData[currentDate]['routes'];
+          })
+      }
+    })
 };
 
 async function getMessages() {
   await fetch(config.messagesAPI)
-  .then(async response => {
-    if(response.ok)
-    {
-      let fetchedData = await response.json()
-      .then(fetchedData => {
-        APIdata.messages_array = fetchedData['displaysMsg'];
-      })
-    }
-  })
+    .then(async response => {
+      if (response.ok) {
+        let fetchedData = await response.json()
+          .then(fetchedData => {
+            APIdata.messages_array = fetchedData['displaysMsg'];
+          })
+      }
+    })
 }
 
 
@@ -118,16 +129,76 @@ function updateMap() {
   for (const singleGPSPos of APIdata.gpsPos_array) {
     let mapKey = singleGPSPos.Line.toString();
     let lineDesc = linesMap.get(mapKey);
-    let vehicleThumbnail = busIcon;
-    if(lineDesc.routeType==="TRAM")
-    {
-      vehicleThumbnail = tramIcon;
-    }
+
+    let vehicleThumbnail = greenBusIcon;
+
+
     let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: vehicleThumbnail });
     let tooltipOffset = [0, 0];
 
-    let popUpStr = "Opóźnienie [s]: " + singleGPSPos.Delay +"<br />Prędkość [km/h]: " + singleGPSPos.Speed +"<br />";
-    popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
+    if (lineDesc.routeType === "TRAM") {
+      vehicleThumbnail = greenTramIcon;
+
+      if (singleGPSPos.Delay > 60) {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: redTramIcon });
+        tooltipOffset = [0, -28];
+      } else {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: greenTramIcon });
+        tooltipOffset = [0, -28];
+      }
+    } else if (lineDesc.routeType === "BUS") {
+      if (singleGPSPos.Delay > 60) {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: redBusIcon });
+        tooltipOffset = [0, -28];
+      } else {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: greenBusIcon });
+        tooltipOffset = [0, -28];
+      }
+    } else {
+
+      //because there is type "UNKNOWN" except "BUS" and "TRAM"
+
+      if (singleGPSPos.Delay > 60) {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: redBusIcon });
+        tooltipOffset = [0, -28];
+      } else {
+
+        marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: greenBusIcon });
+        tooltipOffset = [0, -28];
+      }
+
+
+    }
+
+    function convertToMinutes(delay) {
+      let minutes = (Math.abs(delay) / 60).toFixed(2); // get minutes
+      return minutes;
+    };
+
+    let popUpStr;
+
+
+    if (singleGPSPos.Delay > 0) {
+      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
+      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
+    } else if (singleGPSPos.Delay < 0) {
+
+      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
+      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
+    } else {
+      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
+      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
+    }
+
+
+
+    // let popUpStr = "Opóźnienie [s]: " + singleGPSPos.Delay + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
+    // popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
 
     marker.bindTooltip(String(singleGPSPos.Line), {
       direction: 'top',
@@ -140,22 +211,21 @@ function updateMap() {
   markersGroup.addTo(map);
 }
 
-function displaySingleMessage(stopHeaderContent, messageContent1, messageContent2, time)
-{
+function displaySingleMessage(stopHeaderContent, messageContent1, messageContent2, time) {
   setTimeout(() => {
     document.getElementById("stop_header").innerHTML = stopHeaderContent;
-    let messageString = new String(messageContent1+messageContent2);
+    let messageString = new String(messageContent1 + messageContent2);
     document.getElementById("message_body").innerHTML = messageString;
   }, 10)
 }
 
 function displayMessages() {
   let messagesNum = APIdata.messages_array.length;
-  var interval = config.messagesInterval/messagesNum; // how much time should the delay between two iterations be (in milliseconds)?
+  var interval = config.messagesInterval / messagesNum; // how much time should the delay between two iterations be (in milliseconds)?
   APIdata.messages_array.forEach(function (element, index) {
     setTimeout(function () {
       document.getElementById("stop_header").innerHTML = element.displayName;
-      let messageString = new String(element.messagePart1+element.messagePart2);
+      let messageString = new String(element.messagePart1 + element.messagePart2);
       document.getElementById("message_body").innerHTML = messageString;
       document.getElementById("message_bottom").innerHTML = "Wiadomość wysłana o: " + element.configurationDate;
     }, index * interval);
@@ -176,15 +246,13 @@ function updateUI(data) {
   document.getElementById('lastUpdate').innerText = data.LastUpdateData;
 }
 
-function refreshMap()
-{
+function refreshMap() {
   getLastGPSPositions().then(() => {
     updateMap();
   });
 }
 
-function updateMessages()
-{
+function updateMessages() {
   getMessages().then(() => {
     displayMessages();
   });
@@ -192,11 +260,10 @@ function updateMessages()
 
 getRoutes().then(() => {
   getLines().then(() => {
-    for(const line of APIdata.lines_array)
-    {
-      let lineDesc = { 
+    for (const line of APIdata.lines_array) {
+      let lineDesc = {
         routeLongName: line.routeLongName,
-        routeType:line.routeType 
+        routeType: line.routeType
       };
       linesMap.set(line.routeShortName.toString(), lineDesc);
     }
