@@ -14,7 +14,8 @@ let APIdata = {
   lines_array: null,
   routes_array: null,
   messages_array: null,
-  lastUpdateData: null
+  lastUpdateData: null,
+  chosenLine: "none"
 }
 
 let linesMap = new Map();
@@ -206,7 +207,14 @@ function updateMap() {
       offset: tooltipOffset
     });
     marker.bindPopup(String(popUpStr));
-    marker.addTo(markersGroup);
+    if(APIdata.chosenLine.localeCompare("none")==0)
+    {
+      marker.addTo(markersGroup);
+    }
+    else if(APIdata.chosenLine.localeCompare(lineDesc.routeLongName)==0)
+    {
+      marker.addTo(markersGroup);
+    }
   };
   markersGroup.addTo(map);
 }
@@ -258,21 +266,48 @@ function updateMessages() {
   });
 }
 
-getRoutes().then(() => {
-  getLines().then(() => {
-    for (const line of APIdata.lines_array) {
-      let lineDesc = {
-        routeLongName: line.routeLongName,
-        routeType: line.routeType
-      };
-      linesMap.set(line.routeShortName.toString(), lineDesc);
-    }
-    getLastGPSPositions().then(() => {
-      updateMap();
+function addLinesToDropdown() {
+  let dropdown = document.getElementById("lines_filter");
+  for(const [key, value] of linesMap.entries())
+  {
+    let optionText = key + " " + value.routeLongName;
+    let option = document.createElement("option");
+    option.text = optionText;
+    option.value = value.routeLongName;
+    dropdown.add(option);
+  }
+}
+
+function setChosenLine()
+{
+  APIdata.chosenLine = document.getElementById("lines_filter").value;
+  updateMap();
+}
+
+function resetChosenLine()
+{
+  APIdata.chosenLine = "none";
+  document.getElementById("lines_filter").value="none";
+  updateMap();
+}
+
+window.onload = function() {
+  getRoutes().then(() => {
+    getLines().then(() => {
+      for (const line of APIdata.lines_array) {
+        let lineDesc = {
+          routeLongName: line.routeLongName,
+          routeType: line.routeType
+        };
+        linesMap.set(line.routeShortName.toString(), lineDesc);
+      }
+      addLinesToDropdown();
+      getLastGPSPositions().then(() => {
+        updateMap();
+      });
     });
   });
-});
-
+};
 
 refreshMap();
 updateMessages();
