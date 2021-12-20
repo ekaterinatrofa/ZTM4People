@@ -15,7 +15,8 @@ let APIdata = {
   routes_array: null,
   messages_array: null,
   lastUpdateData: null,
-  chosenLine: "none"
+  chosenLine: "none",
+  chosenVehicleType: "none"
 }
 
 let linesMap = new Map();
@@ -132,7 +133,20 @@ function updateMap() {
     let lineDesc = linesMap.get(mapKey);
 
     let vehicleThumbnail = greenBusIcon;
-
+    if(APIdata.chosenLine.localeCompare("none")!=0)
+    {
+      if(APIdata.chosenLine.localeCompare(lineDesc.routeLongName)!=0)
+      {
+        continue;
+      }
+    }
+    if(APIdata.chosenVehicleType.localeCompare("none")!=0)
+    {
+      if(APIdata.chosenVehicleType.localeCompare(lineDesc.routeType)!=0)
+      {
+        continue;
+      }
+    }
 
     let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: vehicleThumbnail });
     let tooltipOffset = [0, 0];
@@ -207,14 +221,7 @@ function updateMap() {
       offset: tooltipOffset
     });
     marker.bindPopup(String(popUpStr));
-    if(APIdata.chosenLine.localeCompare("none")==0)
-    {
-      marker.addTo(markersGroup);
-    }
-    else if(APIdata.chosenLine.localeCompare(lineDesc.routeLongName)==0)
-    {
-      marker.addTo(markersGroup);
-    }
+    marker.addTo(markersGroup);
   };
   markersGroup.addTo(map);
 }
@@ -224,7 +231,7 @@ function displaySingleMessage(stopHeaderContent, messageContent1, messageContent
     document.getElementById("stop_header").innerHTML = stopHeaderContent;
     let messageString = new String(messageContent1 + messageContent2);
     document.getElementById("message_body").innerHTML = messageString;
-  }, 10)
+  }, time)
 }
 
 function displayMessages() {
@@ -268,8 +275,22 @@ function updateMessages() {
 
 function addLinesToDropdown() {
   let dropdown = document.getElementById("lines_filter");
+  document.querySelectorAll('#lines_filter option').forEach(option => option.remove());
+  let initialOption = document.createElement("option");
+  initialOption.text = "Wybierz linię...";
+  initialOption.value = "none";
+  initialOption.disabled = true;
+  initialOption.selected = true;
+  dropdown.add(initialOption);
   for(const [key, value] of linesMap.entries())
   {
+    if(APIdata.chosenVehicleType.localeCompare("none")!=0)
+    {
+      if(value.routeType.localeCompare(APIdata.chosenVehicleType)!=0)
+      {
+        continue;
+      }
+    }
     let optionText = key + " " + value.routeLongName;
     let option = document.createElement("option");
     option.text = optionText;
@@ -278,16 +299,32 @@ function addLinesToDropdown() {
   }
 }
 
-function setChosenLine()
-{
+function setChosenLine() {
   APIdata.chosenLine = document.getElementById("lines_filter").value;
   updateMap();
 }
 
-function resetChosenLine()
+function setChosenRouteType()
+{
+  if(APIdata.chosenVehicleType.localeCompare("none")==0 || APIdata.chosenVehicleType.localeCompare("TRAM")==0) {
+    APIdata.chosenVehicleType = "BUS";
+    document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko tramwaje";
+  }
+  else if(APIdata.chosenVehicleType.localeCompare("BUS")==0) {
+    APIdata.chosenVehicleType = "TRAM";
+    document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko autobusy";
+  }
+  addLinesToDropdown();
+  updateMap();
+}
+
+function resetAll()
 {
   APIdata.chosenLine = "none";
+  APIdata.chosenVehicleType = "none";
   document.getElementById("lines_filter").value="none";
+  document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko autobusy";
+  addLinesToDropdown();
   updateMap();
 }
 
