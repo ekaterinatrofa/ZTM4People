@@ -239,7 +239,7 @@ function displayMessages() {
   var interval = config.messagesInterval / messagesNum; // how much time should the delay between two iterations be (in milliseconds)?
   APIdata.messages_array.forEach(function (element, index) {
     setTimeout(function () {
-      document.getElementById("stop_header").innerHTML = element.displayName;
+      document.getElementById("stop_header").innerHTML = "Komunikat przystankowy z: "+element.displayName;
       let messageString = new String(element.messagePart1 + element.messagePart2);
       document.getElementById("message_body").innerHTML = messageString;
       document.getElementById("message_bottom").innerHTML = "Wiadomość wysłana o: " + element.configurationDate;
@@ -314,6 +314,7 @@ function setChosenRouteType()
     APIdata.chosenVehicleType = "TRAM";
     document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko autobusy";
   }
+  APIdata.chosenLine = "none";
   addLinesToDropdown();
   updateMap();
 }
