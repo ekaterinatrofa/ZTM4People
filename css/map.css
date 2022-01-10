@@ -1,17 +1,9 @@
 @media screen and (min-width: 600px) {
-<<<<<<< HEAD
   .Map {
     width: 100%;
     height: 75vh;
     z-index: 9;
   }
-=======
-.Map {
-  width: 100%;
-  height: 75vh;
-  z-index: 9;
-}
->>>>>>> ca57119d2a10824be7c72909c8e53d9601b04b0a
 }
 
 @media (max-width: 600px) {
