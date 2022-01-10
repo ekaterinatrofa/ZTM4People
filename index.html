@@ -13,6 +13,12 @@
   <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
+  <div id="filter_div">
+    <label for="lines_filter">Filtruj po linii:</label>
+    <select name="lines_filter" id="lines_filter" onchange="setChosenLine()"></select>
+    <button id="vehicle_type" onclick="setChosenRouteType()">Wyświetl tylko autobusy</button>
+    <button onclick="resetAll()">Wyczyść filtrowanie</button>
+  </div>
   <div id="map" class="Map"></div>
   <div id="messages_div">
     <h3 id="stop_header"></h3>

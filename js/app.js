@@ -14,7 +14,9 @@ let APIdata = {
   lines_array: null,
   routes_array: null,
   messages_array: null,
-  lastUpdateData: null
+  lastUpdateData: null,
+  chosenLine: "none",
+  chosenVehicleType: "none"
 }
 
 let linesMap = new Map();
@@ -131,7 +133,20 @@ function updateMap() {
     let lineDesc = linesMap.get(mapKey);
 
     let vehicleThumbnail = greenBusIcon;
-
+    if(APIdata.chosenLine.localeCompare("none")!=0)
+    {
+      if(APIdata.chosenLine.localeCompare(lineDesc.routeLongName)!=0)
+      {
+        continue;
+      }
+    }
+    if(APIdata.chosenVehicleType.localeCompare("none")!=0)
+    {
+      if(APIdata.chosenVehicleType.localeCompare(lineDesc.routeType)!=0)
+      {
+        continue;
+      }
+    }
 
     let marker = L.marker([singleGPSPos.Lat, singleGPSPos.Lon], { icon: vehicleThumbnail });
     let tooltipOffset = [0, 0];
@@ -216,7 +231,7 @@ function displaySingleMessage(stopHeaderContent, messageContent1, messageContent
     document.getElementById("stop_header").innerHTML = stopHeaderContent;
     let messageString = new String(messageContent1 + messageContent2);
     document.getElementById("message_body").innerHTML = messageString;
-  }, 10)
+  }, time)
 }
 
 function displayMessages() {
@@ -224,7 +239,7 @@ function displayMessages() {
   var interval = config.messagesInterval / messagesNum; // how much time should the delay between two iterations be (in milliseconds)?
   APIdata.messages_array.forEach(function (element, index) {
     setTimeout(function () {
-      document.getElementById("stop_header").innerHTML = element.displayName;
+      document.getElementById("stop_header").innerHTML = "Komunikat przystankowy z: "+element.displayName;
       let messageString = new String(element.messagePart1 + element.messagePart2);
       document.getElementById("message_body").innerHTML = messageString;
       document.getElementById("message_bottom").innerHTML = "Wiadomość wysłana o: " + element.configurationDate;
@@ -258,21 +273,79 @@ function updateMessages() {
   });
 }
 
-getRoutes().then(() => {
-  getLines().then(() => {
-    for (const line of APIdata.lines_array) {
-      let lineDesc = {
-        routeLongName: line.routeLongName,
-        routeType: line.routeType
-      };
-      linesMap.set(line.routeShortName.toString(), lineDesc);
+function addLinesToDropdown() {
+  let dropdown = document.getElementById("lines_filter");
+  document.querySelectorAll('#lines_filter option').forEach(option => option.remove());
+  let initialOption = document.createElement("option");
+  initialOption.text = "Wybierz linię...";
+  initialOption.value = "none";
+  initialOption.disabled = true;
+  initialOption.selected = true;
+  dropdown.add(initialOption);
+  for(const [key, value] of linesMap.entries())
+  {
+    if(APIdata.chosenVehicleType.localeCompare("none")!=0)
+    {
+      if(value.routeType.localeCompare(APIdata.chosenVehicleType)!=0)
+      {
+        continue;
+      }
     }
-    getLastGPSPositions().then(() => {
-      updateMap();
+    let optionText = key + " " + value.routeLongName;
+    let option = document.createElement("option");
+    option.text = optionText;
+    option.value = value.routeLongName;
+    dropdown.add(option);
+  }
+}
+
+function setChosenLine() {
+  APIdata.chosenLine = document.getElementById("lines_filter").value;
+  updateMap();
+}
+
+function setChosenRouteType()
+{
+  if(APIdata.chosenVehicleType.localeCompare("none")==0 || APIdata.chosenVehicleType.localeCompare("TRAM")==0) {
+    APIdata.chosenVehicleType = "BUS";
+    document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko tramwaje";
+  }
+  else if(APIdata.chosenVehicleType.localeCompare("BUS")==0) {
+    APIdata.chosenVehicleType = "TRAM";
+    document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko autobusy";
+  }
+  APIdata.chosenLine = "none";
+  addLinesToDropdown();
+  updateMap();
+}
+
+function resetAll()
+{
+  APIdata.chosenLine = "none";
+  APIdata.chosenVehicleType = "none";
+  document.getElementById("lines_filter").value="none";
+  document.getElementById("vehicle_type").innerHTML = "Wyświetl tylko autobusy";
+  addLinesToDropdown();
+  updateMap();
+}
+
+window.onload = function() {
+  getRoutes().then(() => {
+    getLines().then(() => {
+      for (const line of APIdata.lines_array) {
+        let lineDesc = {
+          routeLongName: line.routeLongName,
+          routeType: line.routeType
+        };
+        linesMap.set(line.routeShortName.toString(), lineDesc);
+      }
+      addLinesToDropdown();
+      getLastGPSPositions().then(() => {
+        updateMap();
+      });
     });
   });
-});
-
+};
 
 refreshMap();
 updateMessages();

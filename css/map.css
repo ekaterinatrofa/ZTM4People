@@ -1,29 +1,64 @@
 @media screen and (min-width: 600px) {
-.Map {
-  width: 100%;
-  height: 80vh;
-  z-index: 9;
-}
-}
-
-@media(max-width: 600px) {
   .Map {
     width: 100%;
-    height: 80vh;
+    height: 75vh;
+    z-index: 9;
+  }
+}
+
+@media (max-width: 600px) {
+  .Map {
+    width: 100%;
+    height: 75vh;
     z-index: 9;
   }
 
 
-  div#messages_div>h3{
+  div#messages_div>h3 {
     font-size: 20px;
   }
 
-  div#messages_div{
-    font-size: 14px;
+  div#messages_div {
+    font-size: 13px;
     text-align: center;
     background-color: rgb(228, 253, 228);
   }
- 
+
+  div#filter_div {
+
+    font-size: 12px;
+    height: 85px;
+    width: 100%;
+    background-color: rgb(228, 253, 228);
+
   }
 
-  
+  #filter_div>button {
+    background-color: #e7e7e7;
+    color: black;
+    font-size: 12px;
+    width: 110px;
+    height: 38px;
+    right: 100%;
+    border-radius: 8px;
+    position: relative;
+    left: 8px;
+
+  }
+
+  #filter_div>label {
+
+    font-size: 15px;
+    position: relative;
+    left: 8px;
+  }
+
+  #filter_div>#lines_filter {
+    /* background-color: rgb(216, 110, 163); */
+    font-size: 12px;
+    width: 185px;
+    position: relative;
+    left: 10px;
+  }
+
+}
