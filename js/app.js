@@ -86,6 +86,7 @@ async function getLastGPSPositions() {
 };
 
 async function getRoutes() {
+  const firstGetRoutes = performance.now()
   await fetch(config.routesAPI)
     .then(async response => {
       if (response.ok) {
@@ -93,12 +94,15 @@ async function getRoutes() {
           .then(fetchedData => {
             let currentDate = new Date().toISOString().slice(0, 10);
             APIdata.routes_array = fetchedData[currentDate]['trips'];
+            const secondGetRoutes = performance.now();
+            console.log("Get routes time(ms): "+(secondGetRoutes - firstGetRoutes))
           })
       }
     })
 };
 
 async function getLines() {
+  const firstGetLines = performance.now();
   await fetch(config.linesAPI)
     .then(async response => {
       if (response.ok) {
@@ -106,18 +110,23 @@ async function getLines() {
           .then(fetchedData => {
             let currentDate = new Date().toISOString().slice(0, 10);
             APIdata.lines_array = fetchedData[currentDate]['routes'];
+            const secondGetLines = performance.now();
+            console.log("Get lines time(ms): "+(secondGetLines-firstGetLines));
           })
       }
     })
 };
 
 async function getMessages() {
+  const firstGetMessages = performance.now();
   await fetch(config.messagesAPI)
     .then(async response => {
       if (response.ok) {
         let fetchedData = await response.json()
           .then(fetchedData => {
             APIdata.messages_array = fetchedData['displaysMsg'];
+            const secondGetMessages = performance.now();
+            console.log("Get messages time(ms): "+(secondGetMessages-firstGetMessages));
           })
       }
     })
@@ -125,7 +134,7 @@ async function getMessages() {
 
 
 function updateMap() {
-
+  const firstUpdateMap = performance.now();
   markersGroup.clearLayers();
 
   for (const singleGPSPos of APIdata.gpsPos_array) {
@@ -220,6 +229,8 @@ function updateMap() {
     marker.addTo(markersGroup);
   };
   markersGroup.addTo(map);
+  const secondUpdateMap = performance.now();
+  console.log("Map updating (markers) time(ms): "+(secondUpdateMap-firstUpdateMap))
 }
 
 function displaySingleMessage(stopHeaderContent, messageContent1, messageContent2, time) {
