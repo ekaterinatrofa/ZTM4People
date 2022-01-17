@@ -68,6 +68,7 @@ let controls = L.control.zoom({
 
 controls.addTo(map);
 
+const firstTileLayer = performance.now();
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
   maxZoom: 17,
   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -76,6 +77,8 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   id: 'mapbox/streets-v11',
   accessToken: 'pk.eyJ1IjoiZWthdGVyaW5hdHJvZmEiLCJhIjoiY2t3MWEyempsMWp0ajJvcWl1OHR3b3F2cyJ9.-WBm6QG9x_C2TEkiBj2lQw'
 }).addTo(map);
+const secondTileLayer = performance.now();
+console.log("Map loading time (ms): "+(secondTileLayer - firstTileLayer));
 
 async function getLastGPSPositions() {
   await fetch(config.gpsPosAPI)
