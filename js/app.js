@@ -170,19 +170,10 @@ function updateMap() {
       let minutes = (Math.abs(delay) / 60).toFixed(2); // get minutes
       return minutes;
     };
-
     let popUpStr;
-    if (singleGPSPos.Delay > 0) {
-      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
-      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
-    } else if (singleGPSPos.Delay < 0) {
-
-      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
-      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
-    } else {
-      popUpStr = "Opóźnienie [min]: " + String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />";
-      popUpStr = popUpStr + "Nazwa linii: " + lineDesc.routeLongName;
-    }
+    (singleGPSPos.Delay >= 0) ? popUpStr = "Opóźnienie [min]: " : popUpStr = "Przyspieszenie [min]: ";
+    popUpStr = popUpStr.concat(String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />");
+    popUpStr = popUpStr.concat("Nazwa linii: " + lineDesc.routeLongName);
 
     marker.bindTooltip(String(singleGPSPos.Line), {
       direction: 'top',
