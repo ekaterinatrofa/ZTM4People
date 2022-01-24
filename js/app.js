@@ -161,12 +161,15 @@ function updateMap() {
   for (const singleGPSPos of APIdata.gpsPos_array) {
     let mapKey = singleGPSPos.Line.toString();
     let lineDesc = linesMap.get(mapKey);
+<<<<<<< .merge_file_a08328
 <<<<<<< HEAD
 
     let vehicleThumbnail = greenBusIcon;
     if (APIdata.chosenLine.localeCompare("none") != 0) {
       if (APIdata.chosenLine.localeCompare(lineDesc.routeLongName) != 0) {
 =======
+=======
+>>>>>>> .merge_file_a27780
     if(APIdata.chosenLine.localeCompare("none")!=0)
     {
       if(APIdata.chosenLine.localeCompare(lineDesc.routeLongName)!=0)
@@ -187,10 +190,13 @@ function updateMap() {
       let minutes = (Math.abs(delay) / 60).toFixed(2); // get minutes
       return minutes;
     };
+<<<<<<< .merge_file_a08328
 <<<<<<< HEAD
   
 =======
 >>>>>>> d6814828ba31e9582646705274e05192d3dd93c4
+=======
+>>>>>>> .merge_file_a27780
     let popUpStr;
     (singleGPSPos.Delay >= 0) ? popUpStr = "Opóźnienie [min]: " : popUpStr = "Przyspieszenie [min]: ";
     popUpStr = popUpStr.concat(String(convertToMinutes(singleGPSPos.Delay)) + "<br />Prędkość [km/h]: " + singleGPSPos.Speed + "<br />");
