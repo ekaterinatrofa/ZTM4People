@@ -1,3 +1,4 @@
+
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
     // failing the test
@@ -10,7 +11,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 describe('The ZTM4People testing', () => {
     it('successfully loads', () => {
         cy.visit('https://ekaterinatrofa.github.io/ZTM4People/');
-        cy.wait(5000);
+        cy.wait(6000);
     });
 
     it('location', () => {
