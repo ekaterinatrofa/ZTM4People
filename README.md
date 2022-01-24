@@ -42,11 +42,11 @@ For more information see here: ***[Leaflet](https://leafletjs.com/index.html)***
 
 
 
-![](./images/img_1.PNG)
-![](./images/img_2.PNG)
+![](./images/img_1.png)
+![](./images/img_2.png)
 ![](./images/img_3.png)
-![](./images/img_4.png)
-![](./images/img_5.png)
+![](./images/img_4.PNG)
+![](./images/img_5.PNG)
 
 Authors:
 
