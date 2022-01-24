@@ -1,0 +1,26 @@
+{
+  "name": "ZTM4People",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekaterinatrofa/ZTM4People.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ekaterinatrofa/ZTM4People/issues"
+  },
+  "homepage": "https://github.com/ekaterinatrofa/ZTM4People#readme",
+  "devDependencies": {
+    "cypress": "^9.2.1"
+  },
+  "dependencies": {
+    "leaflet": "^1.7.1"
+  }
+}
